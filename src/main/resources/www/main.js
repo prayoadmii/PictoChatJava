@@ -1919,7 +1919,7 @@ function scaleStage() {
     document.getElementById("settings").style.width = app.view.width;
     document.getElementById("settings").style.height = app.view.height;
     document.getElementById("logo").style.marginTop = 50 * SCALE - 65;
-    document.getElementById("captcha").style.marginTop = (50 - 57.5) * SCALE;
+    document.getElementById("captcha").style.marginTop = Math.max(8, (50 - 57.5) * SCALE);
     document.getElementById("captcha").style.marginBottom = -50 * SCALE + 57.5;
     document.getElementById("main-settings").style.transform = "scale(" + SCALE + ")";
     document.getElementById("settings-container").style.transform = "scale(" + SCALE + ")";

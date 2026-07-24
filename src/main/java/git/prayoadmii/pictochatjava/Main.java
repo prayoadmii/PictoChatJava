@@ -58,7 +58,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Main {
 	private static final Gson gson = new Gson();
 	private static JDA jda = null;
-	private static String secret = System.getenv("PICTOJAVA_SECRET");
+	private static String captchaSecret = "";
+	private static String captchaSiteKey = "";
+	private static boolean captchaEnabled = false;
 	private static String tcSecret = System.getenv("PICTOJAVA_TRIPCODE_SECRET");
 	private static String channel1 = null;
 	private static String channel2 = null;
@@ -95,6 +97,55 @@ public class Main {
 				}
 			});
 		}
+	}
+
+	private static JsonObject loadAndUpdateSettings(Path settingsPath) throws IOException {
+		settingsPath = settingsPath.toAbsolutePath();
+		JsonObject settingsJson;
+		try (Reader reader = Files.newBufferedReader(settingsPath, StandardCharsets.UTF_8)) {
+			JsonElement settings = JsonParser.parseReader(reader);
+			if (!settings.isJsonObject()) throw new IOException("settings.json must contain a JSON object");
+			settingsJson = settings.getAsJsonObject();
+		}
+
+		JsonObject defaultSettings;
+		try (Reader reader = new InputStreamReader(Objects.requireNonNull(Main.class.getResourceAsStream("/settings.json")), StandardCharsets.UTF_8)) {
+			defaultSettings = JsonParser.parseReader(reader).getAsJsonObject();
+		}
+
+		if (!mergeMissingSettings(settingsJson, defaultSettings)) return settingsJson;
+
+		Path backupFile = settingsPath.resolveSibling(settingsPath.getFileName() + ".bak");
+		Files.copy(settingsPath, backupFile, StandardCopyOption.REPLACE_EXISTING);
+		Path tempFile = Files.createTempFile(settingsPath.toAbsolutePath().getParent(), "settings-", ".json.tmp");
+		try {
+			try (Writer writer = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8)) {
+				new GsonBuilder().setPrettyPrinting().create().toJson(settingsJson, writer);
+			}
+			try {
+				Files.move(tempFile, settingsPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+			} catch (AtomicMoveNotSupportedException ignored) {
+				Files.move(tempFile, settingsPath, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} finally {
+			Files.deleteIfExists(tempFile);
+		}
+		return settingsJson;
+	}
+
+	private static boolean mergeMissingSettings(JsonObject settings, JsonObject defaults) {
+		boolean changed = false;
+		for (Map.Entry<String, JsonElement> entry : defaults.entrySet()) {
+			String key = entry.getKey();
+			JsonElement defaultValue = entry.getValue();
+			if (!settings.has(key) || settings.get(key).isJsonNull()) {
+				settings.add(key, defaultValue.deepCopy());
+				changed = true;
+			} else if (defaultValue.isJsonObject() && settings.get(key).isJsonObject()) {
+				changed |= mergeMissingSettings(settings.getAsJsonObject(key), defaultValue.getAsJsonObject());
+			}
+		}
+		return changed;
 	}
 
 	private static final Color fgColor = new Color(0);
@@ -284,11 +335,14 @@ public class Main {
 			System.exit(1);
 			return;
 		}
-		if (!settingsFile.exists())
-			Files.copy(Objects.requireNonNull(Main.class.getResourceAsStream("/settings.json")), Paths.get("settings.json"), StandardCopyOption.REPLACE_EXISTING);
-		Reader reader = Files.newBufferedReader(settingsFile.toPath());
-		JsonObject settingsJson = gson.fromJson(reader, JsonObject.class);
-		reader.close();
+		if (!settingsFile.exists()) {
+			try {
+				Files.copy(Objects.requireNonNull(Main.class.getResourceAsStream("/settings.json")), settingsFile.toPath());
+			} catch (FileAlreadyExistsException ignored) {
+				// Another startup created the file first; load that file instead of overwriting it.
+			}
+		}
+		JsonObject settingsJson = loadAndUpdateSettings(settingsFile.toPath());
 		if (tcSecret == null || tcSecret.isEmpty()) tcSecret = settingsJson.has("tripcode_secret") ? settingsJson.get("tripcode_secret").getAsString() : "";
 		int port = 8080;
 		if (settingsJson.has("ocr") && settingsJson.get("ocr").getAsBoolean()) {
@@ -299,7 +353,12 @@ public class Main {
 		if (settingsJson.has("port")) port = settingsJson.get("port").getAsInt();
 		String host = "127.0.0.1";
 		if (settingsJson.has("host")) host = settingsJson.get("host").getAsString();
-		if ((secret == null || secret.isEmpty()) && settingsJson.has("secret")) secret = settingsJson.get("secret").getAsString();
+		if (settingsJson.has("recaptcha") && settingsJson.get("recaptcha").isJsonObject()) {
+			JsonObject captchaJson = settingsJson.getAsJsonObject("recaptcha");
+			if (captchaJson.has("enabled")) captchaEnabled = captchaJson.get("enabled").getAsBoolean();
+			if (captchaJson.has("site_key")) captchaSiteKey = captchaJson.get("site_key").getAsString();
+			if (captchaJson.has("secret")) captchaSecret = captchaJson.get("secret").getAsString();
+		}
 		String web;
 		if (settingsJson.has("web")) {
 			web = settingsJson.get("web").getAsString();
@@ -695,7 +754,7 @@ public class Main {
 									}
 									connections.add(ctx.channel());
 								} else {
-									pipeline.addLast(new HttpStaticFileServerHandler(web));
+									pipeline.addLast(new HttpStaticFileServerHandler(web, captchaSiteKey, captchaEnabled));
 								}
 								if (request instanceof FullHttpRequest) ((FullHttpRequest) request).retain();
 								pipeline.fireChannelRead(request);
@@ -1060,27 +1119,19 @@ public class Main {
 						ctx.close();
 						return;
 					}
-					if (!secret.isEmpty()) {
+					if (captchaEnabled) {
 						String token = jsonObject.get("token").getAsString();
-						try (AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient()) {
-							/*
-							InputStream is = asyncHttpClient.preparePost("https://challenges.cloudflare.com/turnstile/v0/siteverify").addFormParam("secret", secret).addFormParam("response", token).execute().toCompletableFuture().join().getResponseBodyAsStream();
+						try (AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient();
+							 InputStream is = asyncHttpClient.preparePost("https://www.google.com/recaptcha/api/siteverify")
+									 .addFormParam("secret", captchaSecret)
+									 .addFormParam("response", token)
+									 .execute().toCompletableFuture().join().getResponseBodyAsStream()) {
 							JsonObject resp = gson.fromJson(new InputStreamReader(is), JsonObject.class);
-							is.close();
 							if (!resp.has("success") || !resp.get("success").getAsBoolean()) {
 								ctx.close();
 								return;
 							}
-							*/
-							String bdy = "response=" + token + "&secret=" + secret;
-							InputStream is = asyncHttpClient.preparePost("https://hcaptcha.com/siteverify").setHeader("Content-Type", "application/x-www-form-urlencoded").setHeader("Content-Length", "" + bdy.length()).setBody(bdy).execute().toCompletableFuture().join().getResponseBodyAsStream();
-							JsonObject resp = gson.fromJson(new InputStreamReader(is), JsonObject.class);
-							is.close();
-							if (!resp.has("success") || !resp.get("success").getAsBoolean()) {
-								ctx.close();
-								return;
-							}
-						} catch (IOException e) {
+						} catch (Exception e) {
 							System.out.println(e.getMessage());
 							ctx.close();
 							return;

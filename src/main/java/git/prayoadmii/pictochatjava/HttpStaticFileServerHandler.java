@@ -15,6 +15,7 @@
  */
 package git.prayoadmii.pictochatjava;
 
+import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -106,9 +107,13 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
     private FullHttpRequest request;
 
     private final String dir;
+    private final String captchaSiteKey;
+    private final boolean captchaEnabled;
 
-    public HttpStaticFileServerHandler(String dir) {
+    public HttpStaticFileServerHandler(String dir, String captchaSiteKey, boolean captchaEnabled) {
         this.dir = dir;
+        this.captchaSiteKey = captchaSiteKey;
+        this.captchaEnabled = captchaEnabled;
     }
 
     @Override
@@ -128,6 +133,10 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
         String uri = request.uri();
         if (uri.contains("?")) {
             uri = uri.substring(0, uri.indexOf('?'));
+        }
+        if ("/recaptcha-config.js".equals(uri)) {
+            sendRecaptchaConfig(ctx, keepAlive);
+            return;
         }
         final String path = sanitizeUri(uri);
         if (path == null) {
@@ -215,6 +224,17 @@ public class HttpStaticFileServerHandler extends SimpleChannelInboundHandler<Ful
             // Close the connection when the whole content is written out.
             lastContentFuture.addListener(ChannelFutureListener.CLOSE);
         }
+    }
+
+    private void sendRecaptchaConfig(ChannelHandlerContext ctx, boolean keepAlive) {
+        String content = "window.RECAPTCHA_ENABLED = " + captchaEnabled + ";\n"
+                + "window.RECAPTCHA_SITE_KEY = " + new Gson().toJson(captchaSiteKey == null ? "" : captchaSiteKey) + ";\n";
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.copiedBuffer(content, CharsetUtil.UTF_8));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/javascript; charset=UTF-8");
+        HttpUtil.setContentLength(response, response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CACHE_CONTROL, HttpHeaderValues.NO_STORE);
+        if (!keepAlive) response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        ctx.writeAndFlush(response).addListener(keepAlive ? ChannelFutureListener.CLOSE_ON_FAILURE : ChannelFutureListener.CLOSE);
     }
 
     @Override

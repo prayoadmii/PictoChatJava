@@ -31,7 +31,8 @@
         <meta property="twitter:description" content="PictoChat web app with a server written in Java! Source: https://github.com/prayoadmii/PictoChatJava">
         <meta name="twitter:image" content="welcome.png">
 
-        <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+        <script src="recaptcha-config.js"></script>
+        <script src="https://www.google.com/recaptcha/api.js?onload=renderRecaptcha&render=explicit" defer></script>
 
         <script src="fontfaceobserver.js"></script>
         <script src="howler.min.js"></script>
@@ -164,6 +165,13 @@
                 transform: scale(1);
             }
 
+            #captcha {
+                width: 304px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: auto;
+            }
+
             #intro_bg {
                 width: 100%;
                 position: absolute;
@@ -257,7 +265,7 @@
             }
 
             html.dark body,
-            html.dark iframe[title*="hCaptcha"],
+            html.dark iframe[title*="reCAPTCHA"],
             html.dark #captcha,
             html.dark .pcr-app,
             html.dark .pcr-button {
@@ -269,9 +277,9 @@
     <body>
         <div id="root">
             <div id="intro">
-                <img src="images/intro_bg.png" id="intro_bg" />
+                <img src="images/intro_bg.png" id="intro_bg">
                 <div id="main-settings">
-                    <div id="captcha" style="transform: scale(calc(91 / 300)); height: 65px;" class="h-captcha" data-theme="light" data-retry="never" data-sitekey="49043ad8-6b2d-4f6c-bfa5-a8c9f235e048" data-callback="setVerificationToken" data-error-callback="setVerificationToken"></div>
+                    <div id="captcha" style="transform: scale(calc(101 / 314)); height: 40px;"></div>
                     <img src="images/logo_dc.png" id="logo" onclick="sounds.error.play()" title="Connecting... Please wait!" alt="Connect to PictoChat">
                     <div class="intro-text">Username:</div>
                     <input type="text" id="name_box" spellcheck="false" maxlength="10" onkeyup="fixUserbox(this)">
@@ -383,11 +391,33 @@
                 object.value = object.value.replace(/[^\w\s]/gi, '');
             }
 
-            let token = true; // set this to true if no captcha
+            let token = !window.RECAPTCHA_ENABLED;
+
+            function renderRecaptcha() {
+                const captcha = document.getElementById("captcha");
+                if (!window.RECAPTCHA_ENABLED) {
+                    captcha.style.display = "none";
+                    return;
+                }
+                if (!window.RECAPTCHA_SITE_KEY) {
+                    captcha.textContent = "reCAPTCHA is not configured.";
+                    return;
+                }
+                grecaptcha.render(captcha, {
+                    sitekey: window.RECAPTCHA_SITE_KEY,
+                    theme: "light",
+                    callback: setVerificationToken,
+                    "expired-callback": clearVerificationToken,
+                    "error-callback": clearVerificationToken
+                });
+            }
 
             function setVerificationToken(t) {
                 token = t;
-                if (token === "invalid_domain") document.getElementById("captcha").style.opacity = 0;
+            }
+
+            function clearVerificationToken() {
+                token = false;
             }
 
             let authed = false;

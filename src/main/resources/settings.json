@@ -3,7 +3,11 @@
 	"host": "127.0.0.1",
 	"tripcode_secret": "pictochatjava",
 	"web": "www",
-	"secret": "",
+	"recaptcha": {
+		"enabled": false,
+		"site_key": "",
+		"secret": ""
+	},
 	"discord": {
 		"enabled": false,
 		"token": "",

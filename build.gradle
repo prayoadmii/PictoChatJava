@@ -8,7 +8,7 @@ java {
 }
 
 group 'git.prayoadmii.pictochatjava'
-version '26.1'
+version '26.1.1'
 
 repositories {
     mavenCentral()

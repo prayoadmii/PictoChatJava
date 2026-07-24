@@ -41,5 +41,16 @@ You can change the port and other configurable settings as well in a similar man
 To make tripcodes unique and reduce the risk of cracking, in the `settings.json` file, set the `tripcode_secret` to something unique and do not share it.
 
 ### The captcha
-To use the captcha, set the `secret` in the settings.json to your Cloudflare Turnstile captcha secret.
-To disable the captcha entirely, edit the `www/index.html` file and search for `let token = false;` and change it to `let token = true;`. Then, remove or comment out the `<div id="captcha" ...` element and the `<script src="https://challenges.cloudflare.com/ ...` element.
+To use Google reCAPTCHA v2, create a Checkbox reCAPTCHA key pair in the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin/create). Configure it in `settings.json`:
+
+```json
+"recaptcha": {
+  "enabled": true,
+  "site_key": "your-public-site-key",
+  "secret": "your-secret-key"
+}
+```
+
+Set `enabled` to `false` to disable CAPTCHA. If it is enabled without valid keys, the app blocks joins rather than bypassing verification.
+
+On startup, the app safely adds missing settings from the current defaults to existing `settings.json` files without replacing existing values or unknown fields. Before a migration, it saves the previous file as `settings.json.bak`. Existing CAPTCHA credentials are not enabled automatically; configure the reCAPTCHA key pair above before enabling it.
