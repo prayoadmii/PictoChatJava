@@ -1,21 +1,21 @@
-<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>PictoChat Online Fork By PrayoadMii</title>
+
+        <link rel="icon" type="image/png" sizes="144x144" href="icon.png">
         <link rel="icon" type="image/png" href="icon.png">
 
         <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, minimal-ui">
+
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="format-detection" content="telephone=no">
-
         <link rel="apple-touch-icon" sizes="144x144" href="icon.png">
-        <link rel="icon" type="image/png" sizes="144x144" href="icon.png">
-
         <meta name="msapplication-TileImage" content="icon.png">
         <meta name="msapplication-TileColor" content="#fff">
         <meta name="theme-color" content="#fff">
+        
         <meta name="title" content="PictoChat Online Fork By PrayoadMii">
         <meta name="description" content="PictoChat web app with a server written in Java! Source: https://github.com/prayoadmii/PictoChatJava">
 
@@ -24,7 +24,7 @@
         <meta property="og:title" content="PictoChat Online Fork By PrayoadMii">
         <meta property="og:description" content="PictoChat web app with a server written in Java! Source: https://github.com/prayoadmii/PictoChatJava">
         <meta property="og:image" content="welcome.png">
-        
+
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="https://ptc.prayoadmii.qzz.io/">
         <meta property="twitter:title" content="PictoChat Online Fork By PrayoadMii">
@@ -37,7 +37,7 @@
         <script src="howler.min.js"></script>
         <script src="pixi.min.js"></script>
 
-        <link rel="stylesheet" href="nano.min.css">
+        <link rel="stylesheet" href="nano.min.css" />
 
         <script src="pickr.min.js"></script>
 
@@ -271,7 +271,7 @@
             <div id="intro">
                 <img src="images/intro_bg.png" id="intro_bg" />
                 <div id="main-settings">
-                    <div id="captcha" style="transform: scale(calc(91 / 300)); height: 65px;" class="h-captcha"data-theme="light" data-retry="never" data-sitekey="49043ad8-6b2d-4f6c-bfa5-a8c9f235e048" data-callback="setVerificationToken" data-error-callback="setVerificationToken"></div>
+                    <div id="captcha" style="transform: scale(calc(91 / 300)); height: 65px;" class="h-captcha" data-theme="light" data-retry="never" data-sitekey="49043ad8-6b2d-4f6c-bfa5-a8c9f235e048" data-callback="setVerificationToken" data-error-callback="setVerificationToken"></div>
                     <img src="images/logo_dc.png" id="logo" onclick="sounds.error.play()" title="Connecting... Please wait!" alt="Connect to PictoChat">
                     <div class="intro-text">Username:</div>
                     <input type="text" id="name_box" spellcheck="false" maxlength="10" onkeyup="fixUserbox(this)">
@@ -291,13 +291,21 @@
                     <div style="margin-bottom: 5px; border-bottom: 1px solid black; padding: 5px; text-align: center;">
                         Other Settings
                     </div>
-                    <label for="int-scaling"><input type="checkbox" id="int-scaling" onchange="intScaling(true)">Integer Scaling</label>
+                    <label for="int-scaling"><input type="checkbox" id="int-scaling" onchange="intScaling(true)">
+                        Integer Scaling
+                    </label>
                     <br>
-                    <label for="volume"><input type="range" id="volume" min="0" max="100" onchange="volume(this.value)">Volume</label>
+                    <label for="volume"><input type="range" id="volume" min="0" max="100" onchange="volume(this.value)" />
+                        Volume
+                    </label>
                     <br>
-                    <label for="pressure"><input type="checkbox" id="pressure" onchange="pressure(this.checked)">Pressure Support</label>
+                    <label for="pressure"><input type="checkbox" id="pressure" onchange="pressure(this.checked)">
+                        Pressure Support
+                    </label>
                     <br>
-                    <label for="dark"><input type="checkbox" id="dark" onchange="dark(this.checked)">Dark Mode</label>
+                    <label for="dark"><input type="checkbox" id="dark" onchange="dark(this.checked)">
+                        Dark Mode
+                    </label>
                     <div id="settings-done"><img src="images/done.png" onclick="closeOtherSettings()"></div>
                 </div>
             </div>
