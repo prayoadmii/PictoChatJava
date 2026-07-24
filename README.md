@@ -1,24 +1,23 @@
-# Pictochat Online
+# PictoChat Online
 
-Pictochat for the Nintendo DS & DSi, recreated for browsers!
+PictoChat For The Nintendo DS & DSi Re-Created For Browsers!
 
-# NOTICE: this project does NOT endorse nor is associated with ANY crypto or NFT projects
+# NOTE: Any Ads You May See In The Website Did Not Associated With Use Or Us With Them!
+*(Don't Get Scammed)*
 
-don't get scammed kthx
-
-## In-app commands
+## In-App Commands (Run On The Browser Side)
 - `!block` / `!ignore` / `!unblock` / `!unignore` - Hide/unhide the messages of someone temporarily.
 - `!tripcode` / `!tc` - When provided with a password, will generate a tripcode and send it as the server. Used for verification that someone is who they say they are.
 - `!list` / `!l` - Lists online users.
 
-## Discord commands
+## Discord Commands (Run In Discord Side)
 - `!list` / `!l` - Lists online users.
 
-## Self hosting
-You will need:
-- Git
+## Self Hosting (aka. Fork Of Fork)
+You Will Need:
+- Git (Or GitHub Desktop)
 - Gradle
-- Java 8+ (JDK)
+- Java 25 Or Newer (OpenJDK)
 
 (All of theses steps happens in the terminal/command line)
 1) Clone the repository with the git command (`git clone https://github.com/ayunami2000/ayunpictojava`)
