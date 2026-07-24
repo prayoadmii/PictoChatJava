@@ -43,6 +43,7 @@ import java.math.BigInteger;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.FileSystem;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -703,9 +704,10 @@ public class Main {
 					}
 				}).option(ChannelOption.SO_BACKLOG, 128)
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
-
-		System.out.println("Starting ayunpictojava by ayunami2000 on " + host + ":" + port + "!");
+		
+		System.out.println("Starting PictoChat By Ayunami2000 (PrayoadMii Fork) On http://" + host + ":" + port + " :3");
 		ChannelFuture f = b.bind(host, port);
+		System.out.println("Done! For help, type \"help\"");
 
 		if (System.console() == null) {
 			f.sync();
