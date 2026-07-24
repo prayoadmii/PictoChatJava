@@ -1,4 +1,4 @@
-package me.ayunami2000.ayunpictojava;
+package git.prayoadmii.pictochatjava;
 
 import com.google.gson.*;
 import io.netty.bootstrap.ServerBootstrap;

@@ -2,8 +2,13 @@ plugins {
     id 'java'
 }
 
-group 'me.ayunami2000.ayunpictojava'
-version '1.0-SNAPSHOT'
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+group 'git.prayoadmii.pictochatjava'
+version '26.1'
 
 repositories {
     mavenCentral()
@@ -22,7 +27,7 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes "Main-Class": "me.ayunami2000.ayunpictojava.Main"
+        attributes "Main-Class": "git.prayoadmii.pictochatjava"
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
