@@ -2,7 +2,7 @@
 
 PictoChat For The Nintendo DS & DSi Re-Created For Browsers!
 
-# NOTE: Any Ads You May See In The Website Did Not Associated With Use Or Us With Them!
+# NOTE: Any Ads You May See In The Website Did Not Associated With Us Or Us With Them!
 *(Don't Get Scammed)*
 
 ## In-App Commands (Run On The Browser Side)
