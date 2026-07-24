@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"name": "www",
+			"path": "src/main/resources/www"
+		},
+		{
+			"name": "PictoChatJava",
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}
