@@ -30,6 +30,8 @@ You Will Need:
 8) Copy this file to its' own folder for running, and run it (`java -jar ayunpictojava-1.0-SNAPSHOT.jar`) (or whatever the .jar file is named)
 9) You should see a line in the terminal saying that the server is running on 127.0.0.1:8080, once you see this you can try it out at http://localhost:8080
 
+*(Actually... You Can Just Download `.jar` File From [Releases](https://github.com/prayoadmii/PictoChatJava/releases) And Run It By Step 8)*
+
 ### Changing the port and bind address
 By default, the application will bind to the local address and port 8080. This means that by default it will not be accessible to anyone else on your network.
 To make it accessible, edit the `settings.json` file that is generated after being run at least once, and set host to `0.0.0.0` or `::`. Rerun the program to apply changes.
